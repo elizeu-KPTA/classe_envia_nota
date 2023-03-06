@@ -654,14 +654,23 @@ class Interface:
     # RELATÓRIO
 
     def dados_relatorio(self):
+
+        cor = 'white'
+        comprimento = 900
+        largura = 600
         self.relatorio_janela = Toplevel(self.root)
-        self.relatorio_janela.geometry('600x600+0+0')
-        self.centralizar_janelas(self.relatorio_janela)
-        self.relatorio_janela.attributes()
-        self.relatorio_janela.title("Relatório Envio")
+        x, y = pyautogui.position()
+        y = y - 20
+        print(x, y)
+        self.relatorio_janela.geometry('{}x{}+{}+{}'.format(comprimento, largura, x, y))
+        self.relatorio_janela.configure(background=f'{cor}')
+        #  novaTela.overrideredirect(False) # Faz com que a janela apareça dentro da outra
+        self.relatorio_janela.title('Avisos')
+        self.relatorio_janela.transient(self.root)  #
         self.relatorio_janela.focus_force()  #
         # novaTela.grab_set()  #
         self.relatorio_janela.resizable(False, False)
+
         self.frames_relatorio()
         self.relatorio_janela.mainloop()
 
@@ -675,17 +684,21 @@ class Interface:
         dados = banco_sqlite.busca_todos_emails_cadastrados()
         scrollbar = Scrollbar(janela)
         listaDados = Treeview(janela, height=3,
-                              column=("col1", "col2", "col3", "col4"), yscrollcommand=scrollbar.set)
+                              column=("col1", "col2", "col3", "col4","col5", "col6"), yscrollcommand=scrollbar.set)
         listaDados.heading("#0")
         listaDados.heading("#1", text=" CNPJ/CPF")
         listaDados.heading("#2", text="Número NFS")
         listaDados.heading("#3", text="Razão Social")
         listaDados.heading("#4", text="E-mail")
+        listaDados.heading("#5", text="NF-e")
+        listaDados.heading("#6", text="Status")
         listaDados.column("#0", width=0)
         listaDados.column("#1", width=20)
         listaDados.column("#2", width=50)
         listaDados.column("#3", width=150)
         listaDados.column("#4", width=150)
+        listaDados.column("#5", width=150)
+        listaDados.column("#6", width=150)
         listaDados.place(relx=0.02, rely=0.53, relwidth=0.941, relheight=0.43)
         scrollbar.pack(side="right", fill="y")  # Criação da barra de rolagem.
         scrollbar.config(command=listaDados.yview)
@@ -700,7 +713,7 @@ class Interface:
         listaDados.bind("<Double-1>", self.duplo_click_email)  # busca a função para inserir dados.
         self.listaDados = listaDados
 
-    def porta_entry(self, tecla):
+    """ def porta_entry(self, tecla):
         self.senha.focus()
 
     def senha_entry(self, tecla):
@@ -739,7 +752,7 @@ class Interface:
         self.porta.delete(0, END)
         self.smtp.delete(0, END)
         self.email.delete(0, END)
-
+    """
 
 
     def relatorio_dados(self):
