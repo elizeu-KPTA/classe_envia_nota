@@ -7,10 +7,10 @@ from banco_sqlite import Banco_sqlite
 from classe_email import Email
 from classe_diretorios import Diretorios
 from leitor_de_pdf import LeitorPDF
-
 banco_sqlite = Banco_sqlite()
 diretorios = Diretorios()
 leitorPdf = LeitorPDF()
+
 from datetime import date
 
 
@@ -84,6 +84,7 @@ class Interface:
         button.pack()
 
     def ent_mud_nome(self, tecla):
+
         self.nome_entry.focus()
 
     def ent_mud_email(self, tecla):
@@ -131,9 +132,10 @@ class Interface:
 
         bt_atualiza = Button(novaTela, text='Atualizar', command=self.atualiza_dados_cadastro)
         bt_atualiza.place(relx=0.4, rely=0.04, relwidth=0.06, relheight=0.04)
-
         bt_exclui = Button(novaTela, text='Excluir', command=self.exclui_dados_cadastro)
         bt_exclui.place(relx=0.5, rely=0.04, relwidth=0.06, relheight=0.04)
+        Style().configure("Excluir", padding=6, relief="flat",
+                          background="#FFF001")
 
         x, y = pyautogui.position()
         y = y - 5
@@ -290,7 +292,7 @@ class Interface:
         dados = banco_sqlite.busca_todos_emails_cadastrados()
         scrollbar = Scrollbar(janela)
         listaDados = Treeview(janela, height=3,
-                              column=("col1", "col2", "col3", "col4"), yscrollcommand=scrollbar.set)
+                              column=("col1", "col2", "col3", "col4"),show='headings', yscrollcommand=scrollbar.set)
         listaDados.heading("#0")
         listaDados.heading("#1", text="Código")
         listaDados.heading("#2", text="Porta")
@@ -314,6 +316,9 @@ class Interface:
         self.dados_duplo = listaDados
         listaDados.bind("<Double-1>", self.duplo_click_email)  # busca a função para inserir dados.
         self.listaDados = listaDados
+        style = Style()
+        style.theme_use("default")
+        style.map("Treeview")
 
     def porta_entry(self, tecla):
         self.senha.focus()
@@ -531,7 +536,7 @@ class Interface:
 
         x, y = pyautogui.position()
         y = y - 20
-        self.X =x
+        self.X = x
         self.Y = y
 
         self.envia_arquivo_janela.geometry('{}x{}+{}+{}'.format(compri, altura, x, y))
@@ -587,8 +592,6 @@ class Interface:
             except Exception as e:
                 print(f'Erro ao salvar dados: {e}')
 
-
-
     def envios_notas(self):
         self.teste = Toplevel(self.root)
         self.teste.geometry(f"300x100+{self.X}+{self.Y}")
@@ -636,7 +639,7 @@ class Interface:
 
                 texto = Text(self.teste, bg='white', fg='Black', font=('Arial', 10))
                 texto.place(relx=0.01, rely=0.6, relwidth=0.98, relheight=0.3)
-                texto.insert('end',dados)
+                texto.insert('end', dados)
                 self.root.update()
                 vt += 1
                 if inc > 99.38:
@@ -646,17 +649,12 @@ class Interface:
             print(e)
         self.teste.mainloop()
 
-
-
-
-
-
     # RELATÓRIO
 
     def dados_relatorio(self):
 
         cor = 'white'
-        comprimento = 900
+        comprimento = 1000
         largura = 600
         self.relatorio_janela = Toplevel(self.root)
         x, y = pyautogui.position()
@@ -664,54 +662,93 @@ class Interface:
         print(x, y)
         self.relatorio_janela.geometry('{}x{}+{}+{}'.format(comprimento, largura, x, y))
         self.relatorio_janela.configure(background=f'{cor}')
-        #  novaTela.overrideredirect(False) # Faz com que a janela apareça dentro da outra
+        # self.relatorio_janela.overrideredirect(True) # Faz com que a janela apareça dentro da outra
         self.relatorio_janela.title('Avisos')
-        self.relatorio_janela.transient(self.root)  #
-        self.relatorio_janela.focus_force()  #
+        #self.relatorio_janela.transient(self.root)  #
+        # self.relatorio_janela.focus_force()  #
         # novaTela.grab_set()  #
-        self.relatorio_janela.resizable(False, False)
-
-        self.frames_relatorio()
+        # self.relatorio_janela.resizable(False, False)
+        self.relatorio(self.relatorio_janela)
         self.relatorio_janela.mainloop()
 
-    def frames_relatorio(self):
-        self.frame_relatorio = Frame(self.relatorio_janela, bd=4, bg='LightGray',
-                                     highlightbackground="LightGray")
-        self.frame_relatorio.place(relx=0.01, rely=0.01, relwidth=0.99, relheight=0.95)
-        self.relatorio(self.frame_relatorio)
+    def criar_tabela(self, janela):
+        tabela = Treeview(janela, height=3, column=("col1", "col2", "col3", "col4", "col5", "col6"))
+        tabela.heading("#0")
+        tabela.heading("#1", text=" CNPJ/CPF", command=lambda: self.ordenar_tabela(tabela, 1, False))
+        tabela.heading("#2", text="Razão Social", command=lambda: self.ordenar_tabela(tabela, 4, True))
+        tabela.heading("#3", text="N° NFS", command=lambda: self.ordenar_tabela(tabela, 3, False))
+        tabela.heading("#4", text="E-mail", command=lambda: self.ordenar_tabela(tabela, 4, False))
+        tabela.heading("#5", text="NF-e", command=lambda: self.ordenar_tabela(tabela, 5, False))
+        tabela.heading("#6", text="Status", command=lambda: self.ordenar_tabela(tabela, 6, False))
+        tabela.column("#0", minwidth=0, width=0)
+        tabela.column("#1", minwidth=70, width=90, anchor=CENTER)
+        tabela.column("#2", width=250)
+        tabela.column("#3", width=50, anchor=CENTER)
+        tabela.column("#4", width=200, anchor=CENTER)
+        tabela.column("#5", width=100, anchor=CENTER)
+        tabela.column("#6", width=50, anchor=CENTER)
+        tabela.place(relx=0.001, rely=0.05, relwidth=0.975, relheight=0.94)
+        return tabela
 
-    def relatorio(self, janela):  # Criação da tabela de cadastro.
-        dados = banco_sqlite.busca_todos_emails_cadastrados()
-        scrollbar = Scrollbar(janela)
-        listaDados = Treeview(janela, height=3,
-                              column=("col1", "col2", "col3", "col4","col5", "col6"), yscrollcommand=scrollbar.set)
-        listaDados.heading("#0")
-        listaDados.heading("#1", text=" CNPJ/CPF")
-        listaDados.heading("#2", text="Número NFS")
-        listaDados.heading("#3", text="Razão Social")
-        listaDados.heading("#4", text="E-mail")
-        listaDados.heading("#5", text="NF-e")
-        listaDados.heading("#6", text="Status")
-        listaDados.column("#0", width=0)
-        listaDados.column("#1", width=20)
-        listaDados.column("#2", width=50)
-        listaDados.column("#3", width=150)
-        listaDados.column("#4", width=150)
-        listaDados.column("#5", width=150)
-        listaDados.column("#6", width=150)
-        listaDados.place(relx=0.02, rely=0.53, relwidth=0.941, relheight=0.43)
-        scrollbar.pack(side="right", fill="y")  # Criação da barra de rolagem.
-        scrollbar.config(command=listaDados.yview)
-        scrollbar.place(relx=0.96, rely=0.533, relwidth=0.028, relheight=0.426)
-        listaDados.delete(*listaDados.get_children())
+    def ordenar_tabela(self, tabela, coluna, ascendente):
+        dados = [(tabela.set(i, coluna), i) for i in tabela.get_children("")]
+        dados.sort(reverse=not ascendente)
+        for index, (val, k) in enumerate(dados):
+            tabela.move(k, '', index)
+        tabela.heading("#" + str(coluna), command=lambda: self.ordenar_tabela(tabela, coluna, not ascendente))
 
+    def preencher_tabela(self, tabela, dados):
+        tabela.delete(*tabela.get_children())
         for i in dados:
-            print(i)
-            listaDados.insert("", END, values=i)
+            tabela.insert("", END, values=i)
 
-        self.dados_duplo = listaDados
-        listaDados.bind("<Double-1>", self.duplo_click_email)  # busca a função para inserir dados.
-        self.listaDados = listaDados
+    def adicionar_barra_rolagem(self, janela, tabela):
+        scrollbar = Scrollbar(janela, orient="vertical", command=tabela.yview)
+        tabela.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side="right", fill="y")
+        scrollbar.place(relx=0.981, rely=0.05, relwidth=0.015, relheight=0.926)
+
+    def definir_estilo_tabela(self):
+        style = Style()
+        style.theme_use("default")
+        style.map("Treeview")
+
+    def ordenar_coluna(self, tabela, coluna, ordem='crescente'):
+        # Obtém os dados da tabela como uma lista de tuplas
+        dados = [(tabela.set(id_, coluna), id_) for id_ in tabela.get_children('')]
+
+        # Ordena os dados
+        dados.sort(reverse=(ordem == 'decrescente'))
+
+        # Reorganiza as linhas da tabela com base nos dados ordenados
+        for index, (valor, id_) in enumerate(dados):
+            tabela.move(id_, '', index)
+            tabela.item(id_, values=tuple(valor))
+
+    def ordenar_dados(self, dados, coluna):
+        """
+        Ordena os dados de acordo com a coluna selecionada.
+        """
+        return sorted(dados, key=lambda x: x[coluna])
+
+    def relatorio(self, janela):
+        dados = banco_sqlite.busca_dados_pdf()
+
+        dados_ordenados = self.ordenar_dados(dados, 1)  # Ordena por razão social
+        tabela = self.criar_tabela(janela)
+        # tabela.heading("#1", text=" CNPJ/CPF", command=lambda: self.ordenar_coluna(tabela, "col1"))
+        self.preencher_tabela(tabela, dados_ordenados)
+        self.adicionar_barra_rolagem(janela, tabela)
+        self.definir_estilo_tabela()
+
+        # tabela.bind("<Double-1>", self.duplo_click_email)
+        self.dados_duplo = tabela
+        self.listaDadosRelatorio = tabela
+
+
+
+
+
 
     """ def porta_entry(self, tecla):
         self.senha.focus()
@@ -753,7 +790,6 @@ class Interface:
         self.smtp.delete(0, END)
         self.email.delete(0, END)
     """
-
 
     def relatorio_dados(self):
 
