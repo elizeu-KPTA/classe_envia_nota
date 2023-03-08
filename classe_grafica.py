@@ -659,8 +659,11 @@ class Interface:
         self.relatorio_janela = Toplevel(self.root)
         x, y = pyautogui.position()
         y = y - 20
+        x = x - 130
         print(x, y)
         self.relatorio_janela.geometry('{}x{}+{}+{}'.format(comprimento, largura, x, y))
+
+        self.relatorio_janela.geometry("1000x600")
         self.relatorio_janela.configure(background=f'{cor}')
         # self.relatorio_janela.overrideredirect(True) # Faz com que a janela apareça dentro da outra
         self.relatorio_janela.title('Avisos')
@@ -675,13 +678,13 @@ class Interface:
         tabela = Treeview(janela, height=3, column=("col1", "col2", "col3", "col4", "col5", "col6"))
         tabela.heading("#0")
         tabela.heading("#1", text=" CNPJ/CPF", command=lambda: self.ordenar_tabela(tabela, 1, False))
-        tabela.heading("#2", text="Razão Social", command=lambda: self.ordenar_tabela(tabela, 4, True))
+        tabela.heading("#2", text="Razão Social", command=lambda: self.ordenar_tabela(tabela, 2, True))
         tabela.heading("#3", text="N° NFS", command=lambda: self.ordenar_tabela(tabela, 3, False))
         tabela.heading("#4", text="E-mail", command=lambda: self.ordenar_tabela(tabela, 4, False))
         tabela.heading("#5", text="NF-e", command=lambda: self.ordenar_tabela(tabela, 5, False))
         tabela.heading("#6", text="Status", command=lambda: self.ordenar_tabela(tabela, 6, False))
         tabela.column("#0", minwidth=0, width=0)
-        tabela.column("#1", minwidth=70, width=90, anchor=CENTER)
+        tabela.column("#1", minwidth=70, width=90)
         tabela.column("#2", width=250)
         tabela.column("#3", width=50, anchor=CENTER)
         tabela.column("#4", width=200, anchor=CENTER)
@@ -731,104 +734,38 @@ class Interface:
         """
         return sorted(dados, key=lambda x: x[coluna])
 
+    def buscar_dados(self):
+        texto_pesquisa = self.pesquisa_entry.get()
+
+        # Filtra os dados com base no texto digitado pelo usuário
+        dados_filtrados = [dados for dados in banco_sqlite.busca_dados_pdf() if
+                           texto_pesquisa.lower() in dados[1].lower() or texto_pesquisa.lower() in dados[0].lower()
+                           or texto_pesquisa.lower() in dados[4].lower() or texto_pesquisa.lower() in dados[5].lower()]
+
+        # Ordena os dados e preenche a tabela com os resultados da busca
+        dados_ordenados = self.ordenar_dados(dados_filtrados, 1)  # Ordena por razão social
+        self.preencher_tabela(self.listaDadosRelatorio, dados_ordenados)
+
     def relatorio(self, janela):
         dados = banco_sqlite.busca_dados_pdf()
+        tabela = self.criar_tabela(janela)
 
         dados_ordenados = self.ordenar_dados(dados, 1)  # Ordena por razão social
-        tabela = self.criar_tabela(janela)
-        # tabela.heading("#1", text=" CNPJ/CPF", command=lambda: self.ordenar_coluna(tabela, "col1"))
         self.preencher_tabela(tabela, dados_ordenados)
         self.adicionar_barra_rolagem(janela, tabela)
         self.definir_estilo_tabela()
 
-        # tabela.bind("<Double-1>", self.duplo_click_email)
         self.dados_duplo = tabela
         self.listaDadosRelatorio = tabela
+        self.dados_duplo = tabela
+        self.listaDadosRelatorio = tabela
+        self.pesquisa_entry = Entry(janela)
+        self.pesquisa_entry.place(relx=0.001, rely=0.001, relwidth=0.8, height=25)
+        self.pesquisa_entry.bind("<Return>", lambda event: self.buscar_dados())
+
+        self.pesquisa_botao = Button(janela, text="Pesquisar", command=self.buscar_dados)
+        self.pesquisa_botao.place(relx=0.81, rely=0.001, relwidth=0.19, height=25)
 
 
-
-
-
-
-    """ def porta_entry(self, tecla):
-        self.senha.focus()
-
-    def senha_entry(self, tecla):
-        self.smtp.focus()
-
-    def email_entry(self, tecla):
-        self.email.focus()
-
-    def insere_config_mail(self):
-        banco_sqlite.insere_dados_email(int(self.porta.get()),
-                                        self.smtp.get(), self.email.get(), self.senha.get())
-
-        self.dados_cad_email(self.cadastro)
-
-    def mostra_selecao(self):  # EXCLUI OS DADOS DO E-MAIL   ----->>> RECEBE A POSIÇÃO SELECIONADA NA LISTA DE DADOS
-        #  selected_item = self.listaDados.selection()
-
-        selected_item = self.listaDados.focus()
-        item_details = self.listaDados.item(selected_item)
-        item_lista = item_details.get("values")
-        print(item_lista)
-
-        banco_sqlite.exclui_email_cadastrado(item_lista[0])
-        self.dados_cad_email(self.cadastro)
-
-    def duplo_click_email(self, event):  # Método será chamado ao clicar duas vezes sobre a tabela.
-        self.dados_duplo.selection()
-        self.limpa_dados_cad_email()
-        for n in self.dados_duplo.selection():
-            col1, col2, col3, col4 = self.dados_duplo.item(n, 'values')
-            self.porta.insert(END, col2)
-            self.smtp.insert(END, col3)
-            self.email.insert(END, col4)
-
-    def limpa_dados_cad_email(self):
-        self.porta.delete(0, END)
-        self.smtp.delete(0, END)
-        self.email.delete(0, END)
-    """
-
-    def relatorio_dados(self):
-
-        self.scrollbar = Scrollbar(self.frame_relatorio)
-        self.scrollbar.pack(side="right", fill="y")
-
-        self.listbox = Listbox(self.frame_relatorio, selectmode="multiple", width=95,
-                               yscrollcommand=self.scrollbar.set)
-        self.listbox.insert("end", "")
-
-        if 0 == 0:
-            dados = banco_sqlite.busca_dados_pdf()
-            var = 11
-            self.listbox.insert("end", "  ", "                                   "
-                                             "                                 INFORMAÇÃO SOBRE A NOTA", '', '')
-            if len(dados) == 0:
-                self.listbox.insert("end", "  ", "                                   "
-                                                 "                               Não há dados a serem exibidos", '', '')
-
-            for i in range(len(dados)):
-                if 1 == 1:
-                    self.listbox.insert("end",
-                                        '_______________________________________________________________________' * 2,
-                                        '')
-                    print(f"     Status:{dados[i][5]}")
-                    self.listbox.insert("end",
-                                        f"              CNPJ/CPF: {dados[i][0]} "
-                                        f"              Número NFS: {dados[i][2]}",
-                                        " ",
-                                        f"              Razão Social: {dados[i][1]}",
-                                        " ",
-                                        f"              E-mail: {dados[i][5]}   "
-                                        f"  Data: {dados[i][7]}", "")
-
-                    # self.listbox.itemconfig(var, fg="green")
-                    var += 10
-
-        self.listbox.pack(side="left", fill="both")
-        self.scrollbar.config(command=self.listbox.yview)
-
-
-interface = Interface()
+if __name__ == '__main__':
+    interface = Interface()

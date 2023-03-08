@@ -8,8 +8,8 @@ banco_sqlite = Banco_sqlite()
 class tabela:
     def __init__(self):
         janela = Tk()
-
-        self.relatorio(janela)
+        teste = Toplevel(janela)
+        self.relatorio(teste)
         janela.geometry("1000x600")
         janela.mainloop()
     def criar_tabela(self,janela):
