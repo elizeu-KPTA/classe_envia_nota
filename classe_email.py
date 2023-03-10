@@ -24,15 +24,17 @@ class Email:
         self.__senha_email = senha_email
 
     def envia_emails(self, nome_aruivo, caminho_arquivo, email, msg_arquivo
-                     , codigo, data):  # Endereço eletrónico e arquivos que
+                     , codigo, data, cnpj, num_nfs):  # Endereço eletrónico e arquivos que
         # serão enviados
         try:
+            print(self, nome_aruivo, caminho_arquivo, email, msg_arquivo
+                     , codigo, data, cnpj, num_nfs)
             fromaddr = self.email_p_envio
             toaddr = str(email)
             msg = MIMEMultipart()
             msg['From'] = fromaddr
             msg['To'] = toaddr
-            msg['Subject'] = str(msg_arquivo)
+            msg['Subject'] = str('teste')
             body = str('teste de envio')
             msg.attach(MIMEText(body, 'plain'))
             filename = str(nome_aruivo)
@@ -49,12 +51,10 @@ class Email:
             text = msg.as_string()
             server.sendmail(fromaddr, toaddr, text)
             server.quit()
-            print('\nEmail e anexos enviado com sucesso!')
-            banco_sqlite.insere_dados_enviados(codigo, email, data, 'Enviado')
-
+            banco_sqlite.insere_tabela_envios(cnpj, nome_aruivo, num_nfs, email, data, 'enviado')
         except Exception as e:
             print(e)
-            banco_sqlite.insere_dados_enviados(codigo, email, data, 'Falha ao enviar')
+            banco_sqlite.insere_tabela_envios(cnpj, nome_aruivo, num_nfs, email, data, f'Não Enviado')
 
     def envia_texto(self, email_rec, titulo, mensagem):
         smtp_ssl_host = self.smtp_ep_envio

@@ -10,6 +10,7 @@ class Banco_sqlite:
         self.create_table_envios_emails()
         self.create_table_email_config()
         self.create_table_dados_pdf()
+        self.create_table_envios()
         self.create_mens()
 
     def create_table_cadastro(self):
@@ -17,7 +18,7 @@ class Banco_sqlite:
                 codigo INTEGER PRIMARY KEY,
                 nome VARCHAR(100) NOT NULL,
                 email varchar(100) not null,
-                cpf_cnpj varchar(21) not null 
+                cpf_cnpj varchar(21) UNIQUE
                 );""")
         self.conexao.commit()
 
@@ -59,6 +60,16 @@ class Banco_sqlite:
                 );""")
         self.conexao.commit()
 
+    def create_table_envios(self):
+        self.conexao.execute(""" CREATE TABLE IF NOT EXISTS "envioDados" (
+                "cnpj"	varchar(18),
+                "razao_social"	varchar(120),
+                "numero_nfe",
+                "email_cliente"	TEXT,
+                "data_env"	TEXT,
+                "status"	TEXT);""")
+        self.conexao.commit()
+
     def insere_cadastro(self, codigo, nome, email, cpf_cnpj):
         if str(codigo).isnumeric():
             try:
@@ -70,18 +81,6 @@ class Banco_sqlite:
                 return 'Dados ja existe'
         else:
             mb.showwarning("Alerta!", "Código informado deve ser um número inteiro!")
-
-    def insere_dados_enviados(self, codigo, email_env, data_env, status):
-        if str(codigo).isnumeric():
-            try:
-                self.conexao.execute("INSERT INTO envia_email (codigo, email_env,data_env, status) VALUES(?, ?, ?, ?)",
-                                     (codigo, email_env, data_env, status))
-                self.conexao.commit()
-                return 'Cadastro realizado com sucesso! Mulinhaa'
-            except:
-                return 'Erro ao cadastrar!'
-        else:
-            return "Erro ao cadastar dados!"
 
     def insere_dados_email(self, porta, smtp, email, senha_email):
         dados = list()
@@ -107,6 +106,29 @@ class Banco_sqlite:
                     return mb.showerror("Erro", "Erro ao inserir e-mail!!")
             else:
                 valDados += 1
+
+    def insere_dados_enviados(self, codigo, email_env, data_env, status):
+        if str(codigo).isnumeric():
+            try:
+                self.conexao.execute("INSERT INTO envia_email (codigo, email_env,data_env, status) VALUES(?, ?, ?, ?)",
+                                     (codigo, email_env, data_env, status))
+                self.conexao.commit()
+                return 'Cadastro realizado com sucesso! Mulinhaa'
+            except:
+                return 'Erro ao cadastrar!'
+        else:
+            return "Erro ao cadastar dados!"
+
+    def insere_tabela_envios(self, cnpj, razao_social, numero_nfe, email_cliente, data_env, status):
+        try:
+            self.conexao.execute("INSERT INTO envioDados (cnpj, razao_social, numero_nfe, email_cliente, "
+                                 "data_env, status) VALUES(?,?,?,?,?,?)",
+                                 (cnpj, razao_social, numero_nfe, email_cliente, data_env, status))
+            self.conexao.commit()
+            return 'Cadastro realizado com sucesso!'
+        except Exception as e:
+            return f'Erro ao cadastrar!{e}'
+
 
     def insere_mensg_email(self, titulo, texto):
         res = mb.askokcancel("Cadastrar",
@@ -190,6 +212,13 @@ class Banco_sqlite:
         for i in query:
             dados.append(i)
         return dados
+    def busca_tabela_dados_de_evio(self):
+
+        query = self.conexao.execute("""SELECT * FROM envioDados; """)
+        dados = list()
+        for i in query:
+            dados.append(i)
+        return dados
 
     def busca_todos_emails_cadastrados(self):
         query = self.conexao.execute("""SELECT id, porta, SMTP, email, senha FROM usuarioEmail;""")
@@ -235,7 +264,15 @@ class Banco_sqlite:
         resp = mb.askquestion("Excluir arquivo!", "Deseja excluir todos os dados do PDF?")
         if resp != 'no':
                 self.conexao.execute("""
-                   DELETE FROM dados_pdf
+                   DELETE FROM dados_pdf;
+                   """)
+                self.conexao.commit()
+
+    def exclui_tabela_de_envio(self):
+        resp = mb.askquestion("Excluir arquivo!", "Deseja excluir todos os dados do PDF?")
+        if resp != 'no':
+                self.conexao.execute("""
+                   DELETE FROM envioDados;
                    """)
                 self.conexao.commit()
 
@@ -263,4 +300,10 @@ print(teste.busca_email_codigo_cadastro('29.171.183/0001-90'))"""
 
 # teste.exclui_dados_pdf()
 
-print(teste.busca_todos_emails_cadastrados())
+
+# print(teste.insere_tabela_envios('056457527205','elizeu batiliere',589,'elibatiliere','25-05-2022', 'enviado'))
+
+# print(teste.busca_tabela_dados_de_evio())
+
+# teste.exclui_tabela_de_envio()
+# teste.exclui_dados_pdf()
