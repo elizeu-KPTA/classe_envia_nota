@@ -95,47 +95,52 @@ class Interface:
     def cadastro_config(self):
         cor = '#B6C6D6'
         novaTela = Toplevel(self.root)
-        self.novaTela = novaTela
-        self.lb = Label(novaTela, text='CÓDIGO:', bg=f'{cor}')  # Label do código
+        frame = Frame(novaTela, bg='red', width=700, height=300)
+        frame.place(relx=0.5, rely=0.8, anchor='center')
+
+        self.lb = Label(frame, text='CÓDIGO:', bg=f'{cor}')  # Label do código
         self.lb.place(relx=0.04, rely=0.04)
 
-        self.codigo_entry = Entry(novaTela, bg='LightGray', fg='Black')  # Entry código
+        self.lb = Label(frame, text='CÓDIGO:', bg=f'{cor}')  # Label do código
+        self.lb.place(relx=0.04, rely=0.04)
 
+        self.codigo_entry = Entry(frame, bg='LightGray', fg='Black')  # Entry código
         self.codigo_entry.place(relx=0.109, rely=0.04, relwidth=0.07)
         self.codigo_entry.bind("<Return>", self.ent_mud_nome)
 
-        self.lb = Label(novaTela, text='NOME:', bg=f'{cor}')  # ------------------------Label do nome
+        self.lb = Label(frame, text='NOME:', bg=f'{cor}')  # ------------------------Label do nome
         self.lb.place(relx=0.04, rely=0.15)
 
-        self.nome_entry = Entry(novaTela, bg='LightGray', fg='Black')  # --Entry do nome
+        self.nome_entry = Entry(frame, bg='LightGray', fg='Black')  # --Entry do nome
         self.nome_entry.place(relx=0.109, rely=0.15, relwidth=0.57)
         self.nome_entry.bind("<Return>", self.ent_mud_email)
 
-        self.lb = Label(novaTela, text='E-MAIL:', bg=f'{cor}')  # -----------------------Label do Email
+        self.lb = Label(frame, text='E-MAIL:', bg=f'{cor}')  # -----------------------Label do Email
         self.lb.place(relx=0.04, rely=0.25)
 
-        self.e_mail_entry = Entry(novaTela, bg='LightGray', fg='Black')  # --Entry do nome
+        self.e_mail_entry = Entry(frame, bg='LightGray', fg='Black')  # --Entry do nome
         self.e_mail_entry.place(relx=0.109, rely=0.25, relwidth=0.57)
         self.e_mail_entry.bind("<Return>", self.ent_mud_cpf)
 
-        self.lb = Label(novaTela, text='CNPJ/CPF:', bg=f'{cor}')
+        self.lb = Label(frame, text='CNPJ/CPF:', bg=f'{cor}')
         self.lb.place(relx=0.03, rely=0.35)
 
-        self.CNPJ_CPF_entry = Entry(novaTela, bg='LightGray', fg='Black')  # Entry CPF/EMAIL
+        self.CNPJ_CPF_entry = Entry(frame, bg='LightGray', fg='Black')  # Entry CPF/EMAIL
         self.CNPJ_CPF_entry.place(relx=0.109, rely=0.35, relwidth=0.30)
         self.CNPJ_CPF_entry.bind("<Return>", '')
 
-        bt_salva = Button(novaTela, text='Salvar', command=self.insere_Cadastro)
-
+        bt_salva = Button(frame, text='Salvar', command=self.insere_Cadastro)
         bt_salva.place(relx=0.3, rely=0.04, relwidth=0.06, relheight=0.04)
 
-        bt_atualiza = Button(novaTela, text='Atualizar', command=self.atualiza_dados_cadastro)
+        bt_atualiza = Button(frame, text='Atualizar', command=self.atualiza_dados_cadastro)
         bt_atualiza.place(relx=0.4, rely=0.04, relwidth=0.06, relheight=0.04)
-        bt_exclui = Button(novaTela, text='Excluir', command=self.exclui_dados_cadastro)
-        bt_exclui.place(relx=0.5, rely=0.04, relwidth=0.06, relheight=0.04)
-        Style().configure("Excluir", padding=6, relief="flat",
-                          background="#FFF001")
 
+        bt_exclui = Button(frame, text='Excluir', command=self.exclui_dados_cadastro)
+        bt_exclui.place(relx=0.5, rely=0.04, relwidth=0.06, relheight=0.04)
+
+        Style().configure("Excluir", padding=6, relief="flat", background="#FFF001")
+
+        frame.pack_propagate(False)
         x, y = pyautogui.position()
         y = y - 5
 
@@ -270,7 +275,7 @@ class Interface:
         self.porta.place(relx=0.17, rely=0.15, relwidth=0.08)
         self.porta.bind("<Return>", self.porta_entry)
 
-        self.senha = Entry(self.cadastro, bg='LightGray', fg='Black', font=('Arial', 10, 'bold'))
+        self.senha = Entry(self.cadastro, bg='LightGray', fg='Black', font=('Arial', 10, 'bold'), show='*')
         self.senha.place(relx=0.17, rely=0.25, relwidth=0.3)
         self.senha.bind("<Return>", self.senha_entry)
 

@@ -10,8 +10,8 @@ from pdfminer.converter import TextConverter
 from pdfminer.pdfinterp import PDFPageInterpreter
 from pdfminer.pdfinterp import PDFResourceManager
 from pdfminer.pdfpage import PDFPage
-from tkinter.ttk import *
 from tkinter import *
+from tkinter.ttk import *
 import os
 
 
@@ -55,6 +55,18 @@ class LeitorPDF:
 
         for page in self.__extrai_pagenas_pdf(caminho_pdf):  # Recebe o local do arquivo pdf
             return page
+    def centralizar_janelas(self, win):
+        win.update_idletasks()
+        width = win.winfo_width()
+        frm_width = win.winfo_rootx() - win.winfo_x()
+        win_width = width + 2 * frm_width
+        height = win.winfo_height()
+        titlebar_height = win.winfo_rooty() - win.winfo_y()
+        win_height = height + titlebar_height + frm_width
+        x = win.winfo_screenwidth() // 2 - win_width // 2
+        y = win.winfo_screenheight() // 2 - win_height // 2
+        win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+        win.deiconify()
 
     def extrai_dados_pdf(self, caminho_arquivos):
         """
@@ -64,10 +76,18 @@ class LeitorPDF:
         dados_completos = list()
         try:
             self.teste = Tk()
+
             self.teste.geometry("300x100")
+            self.centralizar_janelas(self.teste)
             num = len(caminho_arquivos)
             print(num)
-            vt =0
+            vt = 0
+
+            # Criar barra de progresso
+            self.progresso = Progressbar(self.teste, orient=HORIZONTAL, length=100, mode='determinate')
+            self.progresso.place(relx=0.2, rely=0.4, relwidth=0.6)
+
+            Label(self.teste, text="Extrair ")
 
             for i in caminho_arquivos:
                 dados = self._extrai_p(i)
@@ -85,14 +105,15 @@ class LeitorPDF:
                     verifi_autencidade = verifi_autencidade[1].split(' às')
                     dados_completos.append([cpf_cnpj[0], nome_razao[0], numero_nfs[0], verifi_autencidade[0], i])
 
-                    nc = (vt / num) * 100
-                    print(nc)
-                    Label(self.teste, text=f'Extraindo notas: {nc:.2f}% Concluído.').place(rely=0.1,relx=0.2)
-                    self.teste.update()
+                    # Atualizar barra de progresso
                     vt += 1
-                    if nc > 99.38:
+                    self.progresso["value"] = (vt / num) * 100
+                    self.progresso.update()
+
+                    if vt >= num:
                         try:
-                            # self.teste.destroy()
+                            # Destruir barra de progresso e fechar janela
+                            self.progresso.destroy()
                             self.teste.destroy()
                         except Exception as e:
                             print(e)
@@ -100,8 +121,7 @@ class LeitorPDF:
                 except EXCEPTION as e:
                     print(e)
 
-            self.teste.focus_force()  #
-            # novaTela.grab_set()  #
+            self.teste.focus_force()
             self.teste.resizable(False, False)
             self.teste.mainloop()
         except Exception as e:
